@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Droplet - Water Quality Monitoring</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💧</text></svg>">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="particles" id="particles-js"></div>
+    
+    <nav>
+        <div class="container">
+            <div class="logo">DROPLET</div>
+            <div class="nav-links">
+                <a href="#hero">Dashboard</a>
+                <a href="#sensors">Sensors</a>
+                <a href="#insights">Insights</a>
+                <a href="#history">History</a>
+                <div id="connectionStatus" class="connection-status offline">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Disconnected</span>
+                </div>
+            </div>
+            <div class="hamburger">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>
+        </div>
+    </nav>
+
+    <section id="hero" class="hero">
+        <div class="container">
+            <div class="droplet-container">
+                <div class="droplet" id="qualityDroplet">
+                    <div class="droplet-score" id="qualityScore">--%</div>
+                    <div class="droplet-status" id="qualityStatus">Loading...</div>
+                </div>
+            </div>
+            <h1>WATER QUALITY MONITORING</h1>
+            <p class="subtitle">Real-time analysis powered by AI</p>
+        </div>
+    </section>
+
+    <section id="sensors" class="sensors">
+        <div class="container">
+            <h2>LIVE SENSOR READINGS</h2>
+            <div class="sensor-grid">
+                <div class="sensor-card" id="phSensor">
+                    <div class="sensor-liquid"></div>
+                    <div class="sensor-content">
+                        <div class="sensor-icon"><i class="fas fa-tint"></i></div>
+                        <div class="sensor-value">--</div>
+                        <div class="sensor-label">pH LEVEL</div>
+                        <div class="sensor-status">--</div>
+                    </div>
+                </div>
+                <div class="sensor-card" id="tdsSensor">
+                    <div class="sensor-liquid"></div>
+                    <div class="sensor-content">
+                        <div class="sensor-icon"><i class="fas fa-water"></i></div>
+                        <div class="sensor-value">--</div>
+                        <div class="sensor-label">TDS (PPM)</div>
+                        <div class="sensor-status">--</div>
+                    </div>
+                </div>
+                <div class="sensor-card" id="turbiditySensor">
+                    <div class="sensor-liquid"></div>
+                    <div class="sensor-content">
+                        <div class="sensor-icon"><i class="fas fa-wind"></i></div>
+                        <div class="sensor-value">--</div>
+                        <div class="sensor-label">TURBIDITY (NTU)</div>
+                        <div class="sensor-status">--</div>
+                    </div>
+                </div>
+                <div class="sensor-card" id="tempSensor">
+                    <div class="sensor-liquid"></div>
+                    <div class="sensor-content">
+                        <div class="sensor-icon"><i class="fas fa-thermometer-half"></i></div>
+                        <div class="sensor-value">--°C</div>
+                        <div class="sensor-label">TEMPERATURE</div>
+                        <div class="sensor-status">--</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="insights" class="insights">
+        <div class="container">
+            <h2>INTELLIGENT INSIGHTS</h2>
+            <div class="insights-container">
+                <div class="insight-message" id="insightMessages">
+                    <div class="insight-item">
+                        <div class="insight-icon">💧</div>
+                        <div class="insight-text">System initializing. Please wait while we analyze water quality data...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="history" class="history section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Historical Data Analysis</h2>
+                <p class="section-subtitle">Track and analyze water quality metrics over time</p>
+            </div>
+            
+            <div class="history-controls">
+                <div class="time-range-selector">
+                    <button class="time-btn active" data-time="24h">24H</button>
+                    <button class="time-btn" data-time="7d">7D</button>
+                    <button class="time-btn" data-time="30d">30D</button>
+                    <div class="custom-range">
+                        <input type="date" id="startDate" class="date-picker">
+                        <span>to</span>
+                        <input type="date" id="endDate" class="date-picker">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chart-container">
+                <div class="chart-wrapper">
+                    <canvas id="dataChart"></canvas>
+                    <div class="chart-loading" id="chartLoading">
+                        <div class="spinner"></div>
+                        <p>Loading historical data...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-summary">
+                <div class="summary-card">
+                    <div class="summary-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="summary-content">
+                        <h4>Data Points</h4>
+                        <div class="summary-value" id="dataPointsCount">0</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon"><i class="fas fa-clock"></i></div>
+                    <div class="summary-content">
+                        <h4>Time Range</h4>
+                        <div class="summary-value" id="timeRange">-</div>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon"><i class="fas fa-database"></i></div>
+                    <div class="summary-content">
+                        <h4>Last Updated</h4>
+                        <div class="summary-value" id="lastUpdated">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="water-science" class="section">
+        <div class="container">
+            <h2>Understanding Water Quality</h2>
+            <p class="section-subtitle">Hover over each parameter to learn more</p>
+            
+            <div class="science-grid">
+                <div class="science-card">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-atom"></i></div>
+                        <h3>pH Level</h3>
+                        <p class="card-desc">Measures water's acidity or alkalinity</p>
+                    </div>
+                    <div class="card-back">
+                        <h3>pH Level</h3>
+                        <div class="param-detail">
+                            <span class="detail-label">Safe Range:</span>
+                            <span class="detail-value">6.5 - 8.5</span>
+                        </div>
+                        <p>Optimal pH ensures water is neither too acidic nor too alkaline.</p>
+                    </div>
+                </div>
+
+                <div class="science-card">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-tint"></i></div>
+                        <h3>Total Dissolved Solids</h3>
+                        <p class="card-desc">Measures inorganic and organic substances</p>
+                    </div>
+                    <div class="card-back">
+                        <h3>TDS</h3>
+                        <div class="param-detail">
+                            <span class="detail-label">Safe Range:</span>
+                            <span class="detail-value">50 - 500 ppm</span>
+                        </div>
+                        <p>Includes minerals, salts, and metals dissolved in water.</p>
+                    </div>
+                </div>
+
+                <div class="science-card">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-wind"></i></div>
+                        <h3>Turbidity</h3>
+                        <p class="card-desc">Measures water clarity</p>
+                    </div>
+                    <div class="card-back">
+                        <h3>Turbidity</h3>
+                        <div class="param-detail">
+                            <span class="detail-label">Safe Range:</span>
+                            <span class="detail-value">0 - 5 NTU</span>
+                        </div>
+                        <p>High turbidity indicates suspended particles and contamination.</p>
+                    </div>
+                </div>
+
+                <div class="science-card">
+                    <div class="card-front">
+                        <div class="card-icon"><i class="fas fa-thermometer-half"></i></div>
+                        <h3>Temperature</h3>
+                        <p class="card-desc">Measures thermal condition</p>
+                    </div>
+                    <div class="card-back">
+                        <h3>Temperature</h3>
+                        <div class="param-detail">
+                            <span class="detail-label">Safe Range:</span>
+                            <span class="detail-value">10°C - 30°C</span>
+                        </div>
+                        <p>High temperatures can promote bacterial growth.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="section">
+        <div class="container">
+            <h2 class="section-title">How It Works</h2>
+            <div class="process-flow">
+                <div class="process-step">
+                    <div class="step-icon" data-step="1">
+                        <i class="fas fa-tint"></i>
+                        <div class="pulse"></div>
+                    </div>
+                    <h3 class="step-title">Sensors</h3>
+                    <p class="step-desc">Advanced probes monitor water parameters</p>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-icon" data-step="2">
+                        <i class="fas fa-microchip"></i>
+                        <div class="pulse"></div>
+                    </div>
+                    <h3 class="step-title">Processing</h3>
+                    <p class="step-desc">ESP32 processes data for transmission</p>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-icon" data-step="3">
+                        <i class="fas fa-wifi"></i>
+                        <div class="wifi-waves">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <h3 class="step-title">Transmission</h3>
+                    <p class="step-desc">Secure wireless transfer to cloud</p>
+                </div>
+
+                <div class="process-step">
+                    <div class="step-icon" data-step="4">
+                        <i class="fas fa-desktop"></i>
+                        <div class="pulse"></div>
+                    </div>
+                    <h3 class="step-title">Visualization</h3>
+                    <p class="step-desc">Real-time monitoring dashboard</p>
+                </div>
+
+                <div class="connection-line">
+                    <div class="data-packet"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2024 Droplet Water Monitoring. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div class="calibration-btn-container">
+        <button id="calibrateBtn" class="btn btn-primary">Calibrate Sensor</button>
+    </div>
+
+    <button id="exportBtn" class="export-btn">
+        <i class="fas fa-download"></i>
+        <span class="btn-text">Export CSV</span>
+    </button>
+
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span class="toast-message">Downloading Report...</span>
+    </div>
+    
+    <div id="calibrationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Sensor Calibration</h2>
+            <div class="form-group">
+                <label for="sensorSelect" style="color: #e1f5fe; margin-bottom: 10px; display: block;">Select Sensor:</label>
+                <select id="sensorSelect" class="form-control" style="background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2); padding: 10px; width: 100%; border-radius: 5px;">
+                    <option value="ph" style="background: #1a1a2e;">pH Sensor</option>
+                    <option value="tds" style="background: #1a1a2e;">TDS Sensor</option>
+                    <option value="turbidity" style="background: #1a1a2e;">Turbidity Sensor</option>
+                    <option value="temperature" style="background: #1a1a2e;">Temperature Sensor</option>
+                </select>
+            </div>
+            <button id="confirmCalibrate" class="btn btn-primary" style="margin-top: 15px;">Calibrate Now</button>
+        </div>
+    </div>
+    
+    <div id="successModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeSuccessX">&times;</span>
+            <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+            <h2>Calibration Successful!</h2>
+            <p>Your sensor has been calibrated successfully.</p>
+            <button id="closeSuccessModal" class="btn btn-primary">OK</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
