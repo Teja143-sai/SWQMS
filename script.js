@@ -475,7 +475,7 @@ async function fetchRealData() {
         updateConnectionStatus('connecting');
         
         // 1. Fetch from ESP32
-        const response = await fetch('http://172.26.20.192/data', {
+        const response = await fetch('http://10.103.72.192/data', {
             timeout: 5000 // 5 second timeout
         });
         
