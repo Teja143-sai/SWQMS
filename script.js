@@ -3,20 +3,104 @@ let isConnected = false;
 const connectionStatus = document.getElementById('connectionStatus');
 const statusDot = document.querySelector('.status-dot');
 const statusText = document.querySelector('.status-text');
+let connectionCheckInterval;
 
 // Function to update connection status
-function updateConnectionStatus(connected) {
-    isConnected = connected;
-    if (connected) {
-        connectionStatus.classList.remove('offline');
-        connectionStatus.classList.add('online');
-        statusText.textContent = 'System Online';
-    } else {
-        connectionStatus.classList.remove('online');
-        connectionStatus.classList.add('offline');
-        statusText.textContent = 'Disconnected';
+function updateConnectionStatus(status) {
+    // Don't update if the status hasn't changed
+    if ((status === 'online' && connectionStatus.classList.contains('online')) ||
+        (status === 'offline' && connectionStatus.classList.contains('offline'))) {
+        return;
+    }
+    
+    // Clear any existing classes
+    connectionStatus.classList.remove('online', 'offline', 'connecting');
+    
+    switch(status) {
+        case 'online':
+            connectionStatus.classList.add('online');
+            statusText.textContent = 'System Online';
+            console.log('Status: Connected to ESP32');
+            break;
+            
+        case 'connecting':
+            connectionStatus.classList.add('connecting');
+            statusText.textContent = 'Connecting...';
+            console.log('Status: Connecting to ESP32...');
+            // Set a timeout to show offline if connection takes too long
+            setTimeout(() => {
+                if (connectionStatus.classList.contains('connecting')) {
+                    updateConnectionStatus('offline');
+                }
+            }, 5000);
+            break;
+            
+        case 'offline':
+        default:
+            connectionStatus.classList.add('offline');
+            statusText.textContent = 'Disconnected';
+            console.log('Status: Disconnected from ESP32');
     }
 }
+
+// Function to check ESP32 connection
+async function checkConnection() {
+    try {
+        // First, set status to connecting
+        updateConnectionStatus('connecting');
+        
+        // Use the data endpoint we know exists
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 second timeout
+        
+        const response = await fetch('http://172.26.20.192/data', {
+            method: 'GET',
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+            updateConnectionStatus('online');
+            return true;
+        } else {
+            throw new Error('Device not responding');
+        }
+    } catch (error) {
+        console.error('Connection check failed:', error);
+        updateConnectionStatus('offline');
+        return false;
+    }
+}
+
+// Start connection monitoring
+function startConnectionMonitor() {
+    // Initial check
+    checkConnection();
+    
+    // Check every 5 seconds, but only if we're not already checking
+    if (!connectionCheckInterval) {
+        connectionCheckInterval = setInterval(() => {
+            // Only check if we're not already connecting
+            if (!connectionStatus.classList.contains('connecting')) {
+                checkConnection();
+            }
+        }, 5000);
+    }
+}
+
+// Stop connection monitoring
+function stopConnectionMonitor() {
+    if (connectionCheckInterval) {
+        clearInterval(connectionCheckInterval);
+    }
+}
+
+// Start monitoring when the page loads
+window.addEventListener('load', startConnectionMonitor);
+
+// Clean up on page unload
+window.addEventListener('beforeunload', stopConnectionMonitor);
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize components
@@ -475,7 +559,7 @@ async function fetchRealData() {
         updateConnectionStatus('connecting');
         
         // 1. Fetch from ESP32
-        const response = await fetch('http://10.103.72.192/data', {
+        const response = await fetch('http://172.26.20.192/data', {
             timeout: 5000 // 5 second timeout
         });
         
@@ -490,7 +574,7 @@ async function fetchRealData() {
         connectionAttempts = 0;
         
         // 3. Update connection status to online if we got valid data
-        updateConnectionStatus(true);
+        updateConnectionStatus('online');
 
         // 4. Process the data
         const processedData = {
@@ -509,8 +593,8 @@ async function fetchRealData() {
         console.error('Connection Failed:', error);
         connectionAttempts++;
         
-        // Show appropriate status
-        updateConnectionStatus(false, error.message);
+        // Show offline status
+        updateConnectionStatus('offline');
         
         // Try to reconnect if we haven't exceeded max attempts
         if (connectionAttempts < MAX_ATTEMPTS) {
@@ -974,7 +1058,7 @@ async function calibrateSensor(sensorType) {
         calibrateBtn.disabled = true;
 
         // Send calibration request to ESP32
-        const response = await fetch(`http://10.103.72.192/calibrate?target=${sensorType}`);
+        const response = await fetch(`http://10.13.62.192/calibrate?target=${sensorType}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
