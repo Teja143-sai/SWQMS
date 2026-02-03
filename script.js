@@ -1058,7 +1058,7 @@ async function calibrateSensor(sensorType) {
         calibrateBtn.disabled = true;
 
         // Send calibration request to ESP32
-        const response = await fetch(`http://172.26.20.192/calibrate?target=${sensorType}`);
+        const response = await fetch(`http://10.103.72.192/calibrate?target=${sensorType}`);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
