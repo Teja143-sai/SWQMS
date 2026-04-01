@@ -229,7 +229,7 @@ async function fetchRealData() {
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000); 
-        const response = await fetch('http://10.97.248.192/data', { method: 'GET', signal: controller.signal });
+        const response = await fetch('http://10.214.203.192/data', { method: 'GET', signal: controller.signal });
         clearTimeout(timeoutId);
         
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
